@@ -2,6 +2,7 @@ package ink.ptms.tiphareth
 
 import ink.ptms.tiphareth.pack.PackGenerator
 import ink.ptms.tiphareth.pack.PackDispatcher
+import ink.ptms.tiphareth.pack.PackLoader
 import ink.ptms.tiphareth.pack.PackUploader
 import io.izzel.taboolib.module.command.base.BaseCommand
 import io.izzel.taboolib.module.command.base.BaseMainCommand
@@ -28,7 +29,7 @@ class TipharethCommand : BaseMainCommand() {
     fun generate(sender: CommandSender, args: Array<String>) {
         Bukkit.getScheduler().runTaskAsynchronously(Tiphareth.getPlugin(), Runnable {
             sender.sendMessage("§c[Tiphareth] §7正在生成...")
-            PackGenerator.generate(Tiphareth.PACK_ITEMS)
+            PackGenerator.generate(PackLoader.items)
             sender.sendMessage("§c[Tiphareth] §7生成成功.")
             sender.sendMessage("§c[Tiphareth] §7生成上传...")
             if (PackUploader.upload(PackGenerator.file())) {

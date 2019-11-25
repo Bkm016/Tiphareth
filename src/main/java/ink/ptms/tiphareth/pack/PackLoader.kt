@@ -1,10 +1,13 @@
 package ink.ptms.tiphareth.pack
 
+import com.google.common.collect.Lists
 import ink.ptms.tiphareth.Tiphareth
 import io.izzel.taboolib.util.Files
 import java.io.File
 
 object PackLoader {
+
+    val items: MutableList<PackObject> = Lists.newArrayList()
 
     fun loadItems(): List<PackObject> {
         if (File(Tiphareth.getPlugin().dataFolder, "pack").exists()) {

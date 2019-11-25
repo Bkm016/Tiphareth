@@ -48,7 +48,7 @@ object PackGenerator {
             json.addProperty("parent", entry.value.parent)
             val textures = JsonObject()
             entry.value.textures.forEachIndexed { index, texture ->
-                textures.addProperty("layer$index", texture)
+                textures.addProperty("layer$index", "item/$texture")
             }
             json.add("textures", textures)
             val overrides = JsonArray()
