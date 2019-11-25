@@ -1,0 +1,25 @@
+# 自动上传资源包
+# 该功能需要阿里云对象储存业务
+automatically-upload:
+  # 对象储存地址
+  # oss-cn-shanghai.aliyuncs.com
+  endpoint: ~
+  # 储存空间名称
+  bucket-name: mybucket
+  # 储存空间目录
+  object-path: mybucket/tiphareth-pack.zip
+  # 访问密钥
+  access-key-id: ~
+  access-key-secret: ~
+
+# 自动发送资源包
+automatically-dispatch:
+  # 文件地址（如果启用 "automatically-upload" 功能则不需要填写）
+  # https://mybucket.oss-cn-shanghai.aliyuncs.com/mybucket/tiphareth-pack.zip
+  file-url: ~
+  # 强制接受
+  # 需要玩家必须接受资源包下载和安装请求
+  force-to-accept: true
+  # 接受时间
+  # 需要玩家在多少秒内接受资源包请求
+  force-to-accept-timeout: 10

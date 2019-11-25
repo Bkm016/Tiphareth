@@ -1,0 +1,6 @@
+name: Tiphareth
+main: ink.ptms.tiphareth.Tiphareth
+api-version: 1.14
+author: 坏黑
+
+version: ${version}
