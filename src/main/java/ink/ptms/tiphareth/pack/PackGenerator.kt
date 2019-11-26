@@ -84,7 +84,7 @@ object PackGenerator {
         val folderOut = Files.folder(Tiphareth.getPlugin().dataFolder, "pack/item/generated")
         for (file in folderIn.listFiles()) {
             if (file.name.endsWith(".png")) {
-                val args = file.name.replace(".png", "").split("#")
+                val args = file.name.replace(".png", "").replace(Regex("[() ]"), "").split("#")
                 if (args.size != 2) {
                     continue
                 }
@@ -98,8 +98,8 @@ object PackGenerator {
                 })
                 val conf = YamlConfiguration()
                 conf.set("item.material", Items.asMaterial(args[0]).toString())
-                conf.set("item.name", "§7${args[1]}")
-                conf.set("item.lore", listOf("", "§8Made with Tiphareth"))
+                conf.set("item.name", args[1])
+                conf.set("item.lore", listOf("", "Made with Tiphareth"))
                 conf.set("model", GsonBuilder().setPrettyPrinting().create().toJson(json))
                 Files.copy(file, Files.file(folderOut, args[1] + ".png"))
                 Files.toFile(conf.saveToString(), Files.file(folderOut, args[1] + ".yml"))
@@ -112,7 +112,7 @@ object PackGenerator {
         if (mapping.contains(id)) {
             return mapping.getInt(id)
         }
-        val map = mapping.getValues(false).mapValues { it -> NumberConversions.toInt(it) }
+        val map = mapping.getValues(false)
         for (index in 1..16777215) {
             if (!map.containsValue(index)) {
                 mapping.set(id, index)

@@ -35,7 +35,7 @@ public class TipharethAPI {
     public static void openMenu(Player player, String search, int page) {
         Map<Integer, PackObject> objectsMap = Maps.newHashMap();
         List<PackObject> objects = LOADER.getItems().stream().filter(i -> search == null || i.getPackName().contains(search)).collect(Collectors.toList());
-        List<PackObject> objectsSorted = new SimpleIterator(objects).listIterator(page * 28, (page + 1) + 28);
+        List<PackObject> objectsSorted = new SimpleIterator(objects).listIterator(page * 28, (page + 1) * 28);
         Inventory inventory = MenuBuilder.builder()
                 .title("Tiphareth Items - " + (page + 1) + " (search: " + (search == null ? "*" : search) + ")")
                 .rows(6)
@@ -51,11 +51,6 @@ public class TipharethAPI {
                             player.getInventory().addItem(objectsMap.get(e.getRawSlot()).buildItem());
                         }
                     }
-                })
-                .close(e -> {
-                    objectsMap.clear();
-                    objects.clear();
-                    objectsSorted.clear();
                 }).build();
         for (int i = 0; i < objectsSorted.size(); i++) {
             objectsMap.put(Items.INVENTORY_CENTER[i], objectsSorted.get(i));
@@ -78,7 +73,6 @@ public class TipharethAPI {
             public void run() {
                 if (inventory.getViewers().isEmpty()) {
                     cancel();
-                    System.out.println("1");
                 } else if (LOADER.getItems().isEmpty()) {
                     inventory.setItem(49, new ItemStack(Material.BARRIER));
                 } else {

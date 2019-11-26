@@ -2,6 +2,7 @@ package ink.ptms.tiphareth.pack
 
 import com.aliyun.oss.OSSClientBuilder
 import ink.ptms.tiphareth.Tiphareth
+import org.bukkit.Material
 import java.io.File
 import java.io.FileInputStream
 
@@ -15,6 +16,7 @@ object PackUploader {
 
     fun upload(resourcePack: File): Boolean {
         if (isEnable) {
+            Material.SPLASH_POTION
             try {
                 val ossClient = OSSClientBuilder().build(getEndPoint(), getAccessKeyId(), getAccessKeySecret())
                 FileInputStream(resourcePack).use { inputStream ->

@@ -7,6 +7,7 @@ import ink.ptms.tiphareth.pack.PackUploader
 import io.izzel.taboolib.cronus.CronusUtils
 import io.izzel.taboolib.module.command.base.*
 import io.izzel.taboolib.module.lite.SimpleIterator
+import io.izzel.taboolib.util.ArrayUtil
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.command.Command
@@ -30,7 +31,7 @@ class TipharethCommand : BaseMainCommand() {
         override fun getDescription(): String = "获取物品"
 
         override fun onCommand(sender: CommandSender?, p1: Command?, p2: String?, args: Array<out String>?) {
-            val pack = PackLoader.getByName(args!![0]) ?: return
+            val pack = PackLoader.getByName(ArrayUtil.arrayJoin(args, 0)) ?: return
             CronusUtils.addItem(sender as Player, pack.buildItem())
         }
     }
