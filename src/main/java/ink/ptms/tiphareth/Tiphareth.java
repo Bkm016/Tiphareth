@@ -27,7 +27,7 @@ public final class Tiphareth extends Plugin {
     public static final TLogger LOGGER = null;
 
     @TSchedule
-    public void reloadPack() {
+    public static void reloadPack() {
         PackLoader.INSTANCE.getItems().clear();
         PackLoader.INSTANCE.getItems().addAll(PackLoader.INSTANCE.loadItems());
         LOGGER.info("Loaded " + PackLoader.INSTANCE.getItems().size() + " Custom Items.");

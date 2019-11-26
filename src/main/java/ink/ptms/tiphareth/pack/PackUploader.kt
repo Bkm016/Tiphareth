@@ -7,15 +7,13 @@ import java.io.FileInputStream
 
 object PackUploader {
 
-    var packURL = ""
+    var packURL = "https://${getBucketName()}.${getEndPoint()}/${getObjectPath()}"
         private set
 
-    var isEnable = false
+    var isEnable = getEndPoint() != null
         private set
 
     fun upload(resourcePack: File): Boolean {
-        packURL = "https://${getBucketName()}.${getEndPoint()}/${getObjectPath()}"
-        isEnable = getEndPoint() != null
         if (isEnable) {
             try {
                 val ossClient = OSSClientBuilder().build(getEndPoint(), getAccessKeyId(), getAccessKeySecret())

@@ -8,7 +8,9 @@ import ink.ptms.tiphareth.Tiphareth
 import io.izzel.taboolib.module.db.local.Local
 import io.izzel.taboolib.util.Files
 import io.izzel.taboolib.util.IO
+import io.izzel.taboolib.util.item.Items
 import org.bukkit.Material
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.util.NumberConversions
 import java.io.File
 import java.io.FileInputStream
@@ -75,6 +77,34 @@ object PackGenerator {
             }
         }
         Files.deepDelete(folder)
+    }
+
+    fun generateNoModels() {
+        val folderIn = Files.folder(Tiphareth.getPlugin().dataFolder, "pack/item#pre")
+        val folderOut = Files.folder(Tiphareth.getPlugin().dataFolder, "pack/item/generated")
+        for (file in folderIn.listFiles()) {
+            if (file.name.endsWith(".png")) {
+                val args = file.name.replace(".png", "").split("#")
+                if (args.size != 2) {
+                    continue
+                }
+                val json = JsonObject()
+                json.addProperty("credit", "Made with Tiphareth")
+                json.addProperty("parent", getParent(Items.asMaterial(args[0])))
+                json.add("textures", run {
+                    val textures = JsonObject()
+                    textures.addProperty("layer0", args[1])
+                    return@run textures
+                })
+                val conf = YamlConfiguration()
+                conf.set("item.material", Items.asMaterial(args[0]).toString())
+                conf.set("item.name", "§7${args[1]}")
+                conf.set("item.lore", listOf("", "§8Made with Tiphareth"))
+                conf.set("model", GsonBuilder().setPrettyPrinting().create().toJson(json))
+                Files.copy(file, Files.file(folderOut, args[1] + ".png"))
+                Files.toFile(conf.saveToString(), Files.file(folderOut, args[1] + ".yml"))
+            }
+        }
     }
 
     fun generateCustomData(id: String): Int {

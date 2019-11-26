@@ -6,7 +6,9 @@ import ink.ptms.tiphareth.pack.PackLoader
 import ink.ptms.tiphareth.pack.PackUploader
 import io.izzel.taboolib.cronus.CronusUtils
 import io.izzel.taboolib.module.command.base.*
+import io.izzel.taboolib.module.lite.SimpleIterator
 import org.bukkit.Bukkit
+import org.bukkit.Sound
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -33,6 +35,21 @@ class TipharethCommand : BaseMainCommand() {
         }
     }
 
+    @SubCommand(priority = 0.001, description = "所有物品", arguments = ["过滤?"], type = CommandType.PLAYER)
+    fun list(sender: CommandSender, args: Array<String>) {
+        TipharethAPI.openMenu(sender as Player, args.getOrNull(0), 0)
+    }
+
+    @SubCommand(priority = 0.01, description = "重载配置")
+    fun reload(sender: CommandSender, args: Array<String>) {
+        Bukkit.getScheduler().runTaskAsynchronously(Tiphareth.getPlugin(), Runnable {
+            sender.sendMessage("§c[Tiphareth] §7正在重载...")
+            Tiphareth.reloadPack()
+            sender.sendMessage("§c[Tiphareth] §7生成成功.")
+            sender.sendMessage("§c[Tiphareth] §7结束.")
+        })
+    }
+
     @SubCommand(priority = 0.1, description = "获取资源包")
     fun refresh(sender: CommandSender, args: Array<String>) {
         if (sender is Player) {
@@ -52,6 +69,16 @@ class TipharethCommand : BaseMainCommand() {
             } else {
                 sender.sendMessage("§c[Tiphareth] §7上传失败.")
             }
+            sender.sendMessage("§c[Tiphareth] §7结束.")
+        })
+    }
+
+    @SubCommand(priority = 0.3, description = "生成资源素材")
+    fun generateItem(sender: CommandSender, args: Array<String>) {
+        Bukkit.getScheduler().runTaskAsynchronously(Tiphareth.getPlugin(), Runnable {
+            sender.sendMessage("§c[Tiphareth] §7正在生成...")
+            PackGenerator.generateNoModels()
+            sender.sendMessage("§c[Tiphareth] §7生成成功.")
             sender.sendMessage("§c[Tiphareth] §7结束.")
         })
     }

@@ -23,3 +23,6 @@ automatically-dispatch:
   # 接受时间
   # 需要玩家在多少秒内接受资源包请求
   force-to-accept-timeout: 10
+  # 启用跳过权限
+  # 如果玩家持有权限 'tiphareth.bypass" 则不安装
+  force-to-accept-permission-bypass: false
