@@ -9,6 +9,8 @@ object PackLoader {
 
     val items: MutableList<PackObject> = Lists.newArrayList()
 
+    fun getByName(name: String): PackObject? = items.firstOrNull { it.getPackName() == name }
+
     fun loadItems(): List<PackObject> {
         if (File(Tiphareth.getPlugin().dataFolder, "pack").exists()) {
             return loadItem(Files.folder(Tiphareth.getPlugin().dataFolder, "pack/item"))

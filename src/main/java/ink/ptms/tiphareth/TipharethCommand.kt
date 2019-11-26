@@ -4,10 +4,10 @@ import ink.ptms.tiphareth.pack.PackGenerator
 import ink.ptms.tiphareth.pack.PackDispatcher
 import ink.ptms.tiphareth.pack.PackLoader
 import ink.ptms.tiphareth.pack.PackUploader
-import io.izzel.taboolib.module.command.base.BaseCommand
-import io.izzel.taboolib.module.command.base.BaseMainCommand
-import io.izzel.taboolib.module.command.base.SubCommand
+import io.izzel.taboolib.cronus.CronusUtils
+import io.izzel.taboolib.module.command.base.*
 import org.bukkit.Bukkit
+import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
@@ -18,14 +18,29 @@ import org.bukkit.entity.Player
 @BaseCommand(name = "tiphareth", aliases = ["th"], permission = "tiphareth.admin")
 class TipharethCommand : BaseMainCommand() {
 
-    @SubCommand(priority = 0.0, description = "获取资源包")
+    @SubCommand(priority = 0.0)
+    val get = object : BaseSubCommand() {
+
+        override fun getType(): CommandType = CommandType.PLAYER
+
+        override fun getArguments(): Array<Argument> = arrayOf(Argument("物品") { PackLoader.items.map { it.getPackName() }.toList() })
+
+        override fun getDescription(): String = "获取物品"
+
+        override fun onCommand(sender: CommandSender?, p1: Command?, p2: String?, args: Array<out String>?) {
+            val pack = PackLoader.getByName(args!![0]) ?: return
+            CronusUtils.addItem(sender as Player, pack.buildItem())
+        }
+    }
+
+    @SubCommand(priority = 0.1, description = "获取资源包")
     fun refresh(sender: CommandSender, args: Array<String>) {
         if (sender is Player) {
             PackDispatcher.send(sender)
         }
     }
 
-    @SubCommand(priority = 0.0, description = "生成资源包")
+    @SubCommand(priority = 0.2, description = "生成资源包")
     fun generate(sender: CommandSender, args: Array<String>) {
         Bukkit.getScheduler().runTaskAsynchronously(Tiphareth.getPlugin(), Runnable {
             sender.sendMessage("§c[Tiphareth] §7正在生成...")
