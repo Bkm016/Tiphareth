@@ -82,27 +82,30 @@ object PackGenerator {
     fun generateNoModels() {
         val folderIn = Files.folder(Tiphareth.getPlugin().dataFolder, "pack/item#pre")
         val folderOut = Files.folder(Tiphareth.getPlugin().dataFolder, "pack/item/generated")
-        for (file in folderIn.listFiles()) {
-            if (file.name.endsWith(".png")) {
-                val args = file.name.replace(".png", "").replace(Regex("[() ]"), "").split("#")
-                if (args.size != 2) {
-                    continue
+        folderIn.listFiles().filter { it.isDirectory }.forEach { materialFile ->
+            val material = Items.asMaterial(materialFile.name)
+            materialFile.listFiles().forEach { file ->
+                if (file.name.endsWith(".png")) {
+                    val name = file.name.replace(".png", "").replace(Regex("[() ]"), "")
+                    val json = JsonObject()
+                    json.addProperty("credit", "Made with Tiphareth")
+                    json.addProperty("parent", getParent(material))
+                    json.add("textures", run {
+                        val textures = JsonObject()
+                        textures.addProperty("layer0", name)
+                        return@run textures
+                    })
+                    val conf = YamlConfiguration()
+                    conf.set("item.material", material.toString())
+                    conf.set("item.name", name)
+                    conf.set("item.lore", listOf("", "Made with Tiphareth"))
+                    conf.set("model", GsonBuilder().setPrettyPrinting().create().toJson(json))
+                    if (File(folderOut, "$name.png.mcmeta").exists()) {
+                        Files.copy(file, Files.file(folderOut, "$name.png.mcmeta"))
+                    }
+                    Files.copy(file, Files.file(folderOut, "$name.png"))
+                    Files.toFile(conf.saveToString(), Files.file(folderOut, "$name.yml"))
                 }
-                val json = JsonObject()
-                json.addProperty("credit", "Made with Tiphareth")
-                json.addProperty("parent", getParent(Items.asMaterial(args[0])))
-                json.add("textures", run {
-                    val textures = JsonObject()
-                    textures.addProperty("layer0", args[1])
-                    return@run textures
-                })
-                val conf = YamlConfiguration()
-                conf.set("item.material", Items.asMaterial(args[0]).toString())
-                conf.set("item.name", args[1])
-                conf.set("item.lore", listOf("", "Made with Tiphareth"))
-                conf.set("model", GsonBuilder().setPrettyPrinting().create().toJson(json))
-                Files.copy(file, Files.file(folderOut, args[1] + ".png"))
-                Files.toFile(conf.saveToString(), Files.file(folderOut, args[1] + ".yml"))
             }
         }
     }

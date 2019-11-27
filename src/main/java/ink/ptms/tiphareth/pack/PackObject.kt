@@ -40,12 +40,19 @@ class PackObject(val packFile: File, val packType: PackType) {
 
     fun getIconFile(): File = File(packFile.parent, packFile.name.replace(".yml", ".png"))
 
+    fun getMetaFile(): File = File(packFile.parent, packFile.name.replace(".yml", ".png") + ".mcmeta")
+
     fun generateModel(folderModel: File) {
         Files.toFile(model, Files.file(folderModel, packFile.name.replace(".yml", ".json")))
     }
 
     fun generateTexture(folderTexture: File) {
         getIconFile().run {
+            if (this.exists()) {
+                Files.copy(this, Files.file(folderTexture, this.name))
+            }
+        }
+        getMetaFile().run {
             if (this.exists()) {
                 Files.copy(this, Files.file(folderTexture, this.name))
             }

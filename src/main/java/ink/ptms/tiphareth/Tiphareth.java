@@ -12,9 +12,11 @@ import io.izzel.taboolib.module.dependency.TDependencyLoader;
 import io.izzel.taboolib.module.inject.TInject;
 import io.izzel.taboolib.module.inject.TSchedule;
 import io.izzel.taboolib.module.locale.logger.TLogger;
+import org.bukkit.Material;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.List;
 
 @Plugin.Version(5.11)
@@ -30,6 +32,7 @@ public final class Tiphareth extends Plugin {
     public static void reloadPack() {
         PackLoader.INSTANCE.getItems().clear();
         PackLoader.INSTANCE.getItems().addAll(PackLoader.INSTANCE.loadItems());
+        PackLoader.INSTANCE.getItems().sort(Comparator.comparing(PackObject::getPackName));
         LOGGER.info("Loaded " + PackLoader.INSTANCE.getItems().size() + " Custom Items.");
     }
 }
