@@ -86,7 +86,7 @@ object PackGenerator {
             val material = Items.asMaterial(materialFile.name)
             materialFile.listFiles().forEach { file ->
                 if (file.name.endsWith(".png")) {
-                    val name = file.name.replace(".png", "").replace(Regex("[() ]"), "")
+                    val name = file.name.replace(".png", "").replace(Regex("[() ]"), "").toLowerCase()
                     val json = JsonObject()
                     json.addProperty("credit", "Made with Tiphareth")
                     json.addProperty("parent", getParent(material))
@@ -100,11 +100,11 @@ object PackGenerator {
                     conf.set("item.name", name)
                     conf.set("item.lore", listOf("", "Made with Tiphareth"))
                     conf.set("model", GsonBuilder().setPrettyPrinting().create().toJson(json))
-                    if (File(folderOut, "$name.png.mcmeta").exists()) {
-                        Files.copy(file, Files.file(folderOut, "$name.png.mcmeta"))
-                    }
                     Files.copy(file, Files.file(folderOut, "$name.png"))
                     Files.toFile(conf.saveToString(), Files.file(folderOut, "$name.yml"))
+                    if (File(file.parentFile, file.name + ".mcmeta").exists()) {
+                        Files.copy(File(file.parentFile, file.name + ".mcmeta"), Files.file(folderOut, "$name.png.mcmeta"))
+                    }
                 }
             }
         }
