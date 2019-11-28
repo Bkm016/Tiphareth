@@ -5,10 +5,18 @@ import ink.ptms.tiphareth.Tiphareth
 import io.izzel.taboolib.module.locale.TLocale
 import io.izzel.taboolib.module.packet.Packet
 import io.izzel.taboolib.module.packet.TPacket
+import io.izzel.taboolib.util.Strings
 import net.minecraft.server.v1_14_R1.PacketPlayOutResourcePackSend
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.metadata.FixedMetadataValue
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
+import java.security.MessageDigest
+import java.math.BigInteger
+import java.net.URL
+
 
 object PackDispatcher {
 
@@ -37,7 +45,7 @@ object PackDispatcher {
         if (player.hasPermission("tiphareth.bypass") && isForceToAcceptPermissionBypass()) {
             return
         }
-        val url = if (PackUploader.isEnable) PackUploader.packURL else getFileURL()
+        val url = if (PackUploader.isEnable) PackUploader.getPackURL() else getFileURL()
         if (url != null) {
             player.removeMetadata("tiphareth:pack-accept", Tiphareth.getPlugin())
             player.setResourcePack(url)

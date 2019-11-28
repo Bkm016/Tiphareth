@@ -2,14 +2,14 @@ package ink.ptms.tiphareth.pack
 
 import com.aliyun.oss.OSSClientBuilder
 import ink.ptms.tiphareth.Tiphareth
+import ink.ptms.tiphareth.util.Utils
+import io.izzel.taboolib.module.db.local.Local
+import io.izzel.taboolib.module.db.local.LocalFile
 import org.bukkit.Material
 import java.io.File
 import java.io.FileInputStream
 
 object PackUploader {
-
-    var packURL = "https://${getBucketName()}.${getEndPoint()}/${getObjectPath()}"
-        private set
 
     var isEnable = getEndPoint() != null
         private set
@@ -23,6 +23,7 @@ object PackUploader {
                     ossClient.putObject(getBucketName(), getObjectPath(), inputStream)
                     ossClient.shutdown()
                 }
+                Local.get().get("data").set("hash", Utils.getHashCode(resourcePack))
                 return true
             } catch (t: Throwable) {
                 t.printStackTrace()
@@ -30,6 +31,8 @@ object PackUploader {
         }
         return false
     }
+
+    fun getPackURL(): String = "https://${getBucketName()}.${getEndPoint()}/${getObjectPath()}".replace("{hash}", Local.get().get("data").getString("hash", "null")!!)
 
     private fun getEndPoint(): String? = Tiphareth.CONF.getString("automatically-upload.endpoint")
 
