@@ -16,14 +16,13 @@ object PackUploader {
 
     fun upload(resourcePack: File): Boolean {
         if (isEnable) {
-            Material.SPLASH_POTION
+            Local.get().get("data").set("hash", Utils.getHashCode(resourcePack))
             try {
                 val ossClient = OSSClientBuilder().build(getEndPoint(), getAccessKeyId(), getAccessKeySecret())
                 FileInputStream(resourcePack).use { inputStream ->
-                    ossClient.putObject(getBucketName(), getObjectPath(), inputStream)
+                    ossClient.putObject(getBucketName(), getObjectPath()!!.replace("{hash}", Local.get().get("data").getString("hash", "null")!!), inputStream)
                     ossClient.shutdown()
                 }
-                Local.get().get("data").set("hash", Utils.getHashCode(resourcePack))
                 return true
             } catch (t: Throwable) {
                 t.printStackTrace()
