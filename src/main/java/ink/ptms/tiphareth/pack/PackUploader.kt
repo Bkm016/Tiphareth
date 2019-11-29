@@ -8,6 +8,7 @@ import io.izzel.taboolib.module.db.local.LocalFile
 import org.bukkit.Material
 import java.io.File
 import java.io.FileInputStream
+import java.util.*
 
 object PackUploader {
 
@@ -16,7 +17,7 @@ object PackUploader {
 
     fun upload(resourcePack: File): Boolean {
         if (isEnable) {
-            Local.get().get("data").set("hash", Utils.getHashCode(resourcePack))
+            Local.get().get("data").set("hash", UUID.randomUUID().toString().replace("-", ""))
             try {
                 val ossClient = OSSClientBuilder().build(getEndPoint(), getAccessKeyId(), getAccessKeySecret())
                 FileInputStream(resourcePack).use { inputStream ->
