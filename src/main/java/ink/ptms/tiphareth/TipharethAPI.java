@@ -34,7 +34,7 @@ public class TipharethAPI {
 
     public static void openMenu(Player player, String search, int page) {
         Map<Integer, PackObject> objectsMap = Maps.newHashMap();
-        List<PackObject> objects = LOADER.getItems().stream().filter(i -> search == null || i.getPackName().contains(search)).collect(Collectors.toList());
+        List<PackObject> objects = LOADER.getItems().stream().filter(i -> !i.isHide() && (search == null || i.getPackName().contains(search))).collect(Collectors.toList());
         List<PackObject> objectsSorted = new SimpleIterator(objects).listIterator(page * 28, (page + 1) * 28);
         Inventory inventory = MenuBuilder.builder()
                 .title("Tiphareth Items - " + (page + 1) + " (search: " + (search == null ? "*" : search) + ")")
@@ -61,7 +61,7 @@ public class TipharethAPI {
         } else {
             inventory.setItem(47, new ItemBuilder(Material.ARROW).name("§8上一页").build());
         }
-        if (CronusUtils.next(page, LOADER.getItems().size(), 28)) {
+        if (CronusUtils.next(page, objects.size(), 28)) {
             inventory.setItem(51, new ItemBuilder(Material.SPECTRAL_ARROW).name("§e下一页").build());
         } else {
             inventory.setItem(51, new ItemBuilder(Material.ARROW).name("§8下一页").build());

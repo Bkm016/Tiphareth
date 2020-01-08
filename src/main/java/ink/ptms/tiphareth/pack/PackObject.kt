@@ -13,6 +13,9 @@ import java.io.File
  */
 class PackObject(val packFile: File, val packType: PackType) {
 
+    var isHide: Boolean = false
+        private set
+
     var item: ItemStack? = null
         private set
 
@@ -21,6 +24,7 @@ class PackObject(val packFile: File, val packType: PackType) {
 
     init {
         val conf = Files.loadYaml(packFile)
+        isHide = conf.getBoolean("item.hide")
         item = Items.loadItem(conf.getConfigurationSection("item"))
         model = conf.getString("model")
     }
