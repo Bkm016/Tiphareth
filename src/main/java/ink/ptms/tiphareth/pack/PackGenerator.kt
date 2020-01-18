@@ -31,6 +31,8 @@ object PackGenerator {
         // pack info
         Files.copy(File(Tiphareth.getPlugin().dataFolder, "pack/pack.mcmeta"), Files.file(folder, "pack.mcmeta"))
         Files.copy(File(Tiphareth.getPlugin().dataFolder, "pack/pack.png"), Files.file(folder, "pack.png"))
+        // pack resources
+        Files.deepCopy(Files.folder(Tiphareth.getPlugin().dataFolder, "pack/resources").path, Files.folder(folder, "assets/minecraft").path)
         // pack folder
         val folderModels = Files.folder(folder, "assets/minecraft/models")
         val folderTextures = Files.folder(folder, "assets/minecraft/textures")

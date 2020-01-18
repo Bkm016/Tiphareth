@@ -5,6 +5,7 @@ import io.izzel.taboolib.module.inject.TInject
 import io.izzel.taboolib.module.packet.Packet
 import io.izzel.taboolib.module.packet.TPacketListener
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerResourcePackStatusEvent
 
 /**
  * @Author sky
