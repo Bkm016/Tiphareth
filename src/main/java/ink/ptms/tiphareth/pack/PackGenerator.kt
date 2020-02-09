@@ -54,7 +54,7 @@ object PackGenerator {
             }
             json.add("textures", textures)
             val overrides = JsonArray()
-            entry.value.packOverride.forEach { override ->
+            entry.value.packOverride.sortedBy { it.customData }.forEach { override ->
                 val overridesJson = JsonObject()
                 val predicateJson = JsonObject()
                 predicateJson.addProperty("custom_model_data", override.customData)
