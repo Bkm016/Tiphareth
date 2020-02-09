@@ -41,9 +41,7 @@ object PackGenerator {
         packObject.forEach { pack ->
             when (pack.packType) {
                 PackType.ITEM -> {
-                    mapItem.computeIfAbsent(pack.getModelName()) { _ ->
-                        PackModel(getParent(pack.item!!.type), pack.getTextures())
-                    }.packOverride.add(PackOverride(pack.getPackName(), generateCustomData(pack.getPackName())))
+                    mapItem.computeIfAbsent(pack.getModelName()) { PackModel(getParent(pack.item!!.type), pack.getTextures()) }.packOverride.add(PackOverride(pack.getPackName(), generateCustomData(pack)))
                 }
             }
         }
@@ -112,19 +110,15 @@ object PackGenerator {
         }
     }
 
-    fun generateCustomData(id: String): Int {
+    fun generateCustomData(pack: PackObject): Int {
+        val material = pack.item?.type?.name ?: "unknown"
         val mapping = Local.get().get("data-mapping")
-        if (mapping.contains(id)) {
-            return mapping.getInt(id)
+        if (mapping.contains("$material.${pack.getPackName()}")) {
+            return mapping.getInt("$material.${pack.getPackName()}")
         }
-        val map = mapping.getValues(false)
-        for (index in 1..16777215) {
-            if (!map.containsValue(index)) {
-                mapping.set(id, index)
-                return index;
-            }
-        }
-        return -1
+        mapping.set("$material.__index__", mapping.getInt("$material.__index__") + 1)
+        mapping.set("$material.${pack.getPackName()}", mapping.getInt("$material.__index__"))
+        return mapping.getInt("$material.__index__")
     }
 
     private fun getParent(material: Material): String {

@@ -66,7 +66,7 @@ class PackObject(val packFile: File, val packType: PackType) {
     fun buildItem(): ItemStack {
         val item = item!!.clone()
         val meta = item.itemMeta!!
-        meta.setCustomModelData(PackGenerator.generateCustomData(getPackName()))
+        meta.setCustomModelData(PackGenerator.generateCustomData(this))
         item.itemMeta = meta
         return item
     }
