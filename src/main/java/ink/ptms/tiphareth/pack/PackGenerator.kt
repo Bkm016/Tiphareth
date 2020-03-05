@@ -110,6 +110,7 @@ object PackGenerator {
         }
     }
 
+    // 16777215
     fun generateCustomData(pack: PackObject): Int {
         val material = pack.item?.type?.name ?: "unknown"
         val mapping = Local.get().get("data-mapping")

@@ -46,7 +46,7 @@ class TipharethCommand : BaseMainCommand() {
         Bukkit.getScheduler().runTaskAsynchronously(Tiphareth.getPlugin(), Runnable {
             sender.sendMessage("§c[Tiphareth] §7正在重载...")
             Tiphareth.reloadPack()
-            sender.sendMessage("§c[Tiphareth] §7生成成功.")
+            sender.sendMessage("§c[Tiphareth] §7重载成功.")
             sender.sendMessage("§c[Tiphareth] §7结束.")
         })
     }
@@ -58,9 +58,25 @@ class TipharethCommand : BaseMainCommand() {
         }
     }
 
-    @SubCommand(priority = 0.2, description = "生成资源包")
+    @SubCommand(priority = 0.2, description = "上传资源包")
+    fun upload(sender: CommandSender, args: Array<String>) {
+        Bukkit.getScheduler().runTaskAsynchronously(Tiphareth.getPlugin(), Runnable {
+            sender.sendMessage("§c[Tiphareth] §7生成上传...")
+            if (PackUploader.upload(PackGenerator.file())) {
+                sender.sendMessage("§c[Tiphareth] §7上传成功.")
+            } else {
+                sender.sendMessage("§c[Tiphareth] §7上传失败.")
+            }
+            sender.sendMessage("§c[Tiphareth] §7结束.")
+        })
+    }
+
+    @SubCommand(priority = 0.25, description = "生成资源包")
     fun generate(sender: CommandSender, args: Array<String>) {
         Bukkit.getScheduler().runTaskAsynchronously(Tiphareth.getPlugin(), Runnable {
+            sender.sendMessage("§c[Tiphareth] §7正在重载...")
+            Tiphareth.reloadPack()
+            sender.sendMessage("§c[Tiphareth] §7重载成功.")
             sender.sendMessage("§c[Tiphareth] §7正在生成...")
             PackGenerator.generate(PackLoader.items)
             sender.sendMessage("§c[Tiphareth] §7生成成功.")
