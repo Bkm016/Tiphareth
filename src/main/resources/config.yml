@@ -14,6 +14,8 @@ automatically-upload:
 
 # 自动发送资源包
 automatically-dispatch:
+  # 启用
+  dispatch: true
   # 文件地址（如果启用 "automatically-upload" 功能则不需要填写）
   # https://mybucket.oss-cn-shanghai.aliyuncs.com/mybucket/tiphareth-pack.zip
   file-url: ~

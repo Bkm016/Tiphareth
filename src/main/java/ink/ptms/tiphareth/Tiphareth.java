@@ -19,11 +19,11 @@ import java.net.URL;
 import java.util.Comparator;
 import java.util.List;
 
-@Plugin.Version(5.11)
+@Plugin.Version(5.28)
 @Dependency(maven = "com.aliyuncs:oss:3.5.0", url = "https://skymc.oss-cn-shanghai.aliyuncs.com/libs/aliyun-sdk-oss-3.5.0.jar")
 public final class Tiphareth extends Plugin {
 
-    @TInject
+    @TInject(migrate = true)
     public static final TConfig CONF = null;
     @TInject
     public static final TLogger LOGGER = null;

@@ -24,7 +24,7 @@ object PackDispatcher {
 
     @TPacket(type = TPacket.Type.RECEIVE)
     private fun send(player: Player, packet: Packet): Boolean {
-        if (packet.`is`("PacketPlayInPosition") && !dispatchPlayer.contains(player.name)) {
+        if (packet.`is`("PacketPlayInPosition") && !dispatchPlayer.contains(player.name) && Tiphareth.CONF.getBoolean("automatically-dispatch.dispatch")) {
             dispatchPlayer.add(player.name)
             Bukkit.getScheduler().runTask(Tiphareth.getPlugin(), Runnable {
                 send(player)
