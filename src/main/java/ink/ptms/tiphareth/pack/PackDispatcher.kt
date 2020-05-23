@@ -60,6 +60,7 @@ object PackDispatcher {
 
     fun release(player: Player) {
         dispatchPlayer.remove(player.name)
+        player.removeMetadata("tiphareth:pack-accept", Tiphareth.getPlugin())
     }
 
     private fun getFileURL(): String? = Tiphareth.CONF.getString("automatically-dispatch.file-url")
