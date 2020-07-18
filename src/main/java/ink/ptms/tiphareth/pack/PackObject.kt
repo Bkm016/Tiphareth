@@ -65,9 +65,20 @@ class PackObject(val packFile: File, val packType: PackType) {
 
     fun buildItem(): ItemStack {
         val item = item!!.clone()
-        val meta = item.itemMeta!!
-        meta.setCustomModelData(PackGenerator.generateCustomData(this))
-        item.itemMeta = meta
+        try {
+            val meta = item.itemMeta!!
+            meta.setCustomModelData(PackGenerator.generateCustomData(this))
+            item.itemMeta = meta
+        } catch (t: Throwable) {
+            println(toString())
+            t.printStackTrace()
+        }
         return item
     }
+
+    override fun toString(): String {
+        return "PackObject(packFile=$packFile, packType=$packType, isHide=$isHide, item=$item, model=$model)"
+    }
+
+
 }

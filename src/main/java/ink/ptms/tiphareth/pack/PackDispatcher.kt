@@ -5,6 +5,7 @@ import ink.ptms.tiphareth.Tiphareth
 import io.izzel.taboolib.module.locale.TLocale
 import io.izzel.taboolib.module.packet.Packet
 import io.izzel.taboolib.module.packet.TPacket
+import io.izzel.taboolib.util.ArrayUtil
 import io.izzel.taboolib.util.Strings
 import net.minecraft.server.v1_14_R1.PacketPlayOutResourcePackSend
 import org.bukkit.Bukkit
