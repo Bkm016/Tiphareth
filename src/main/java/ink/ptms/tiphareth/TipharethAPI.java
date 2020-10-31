@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
 import java.util.Map;
@@ -66,17 +65,17 @@ public class TipharethAPI {
         } else {
             inventory.setItem(51, new ItemBuilder(Material.ARROW).name("§8下一页").build());
         }
-        player.playSound(player.getLocation(), Sound.BLOCK_BARREL_OPEN, 1f, 1f);
+        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 2f);
         player.openInventory(inventory);
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (inventory.getViewers().isEmpty()) {
                     cancel();
-                } else if (LOADER.getItems().isEmpty()) {
+                } else if (objects.isEmpty()) {
                     inventory.setItem(49, new ItemStack(Material.BARRIER));
                 } else {
-                    inventory.setItem(49, LOADER.getItems().get(Numbers.getRandom().nextInt(LOADER.getItems().size())).buildItem());
+                    inventory.setItem(49, objects.get(Numbers.getRandom().nextInt(objects.size())).buildItem());
                 }
             }
         }.runTaskTimer(Tiphareth.getPlugin(), 0, 10);

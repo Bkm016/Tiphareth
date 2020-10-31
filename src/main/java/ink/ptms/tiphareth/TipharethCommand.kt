@@ -13,6 +13,7 @@ import org.bukkit.Sound
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.util.NumberConversions
 
 /**
  * @Author sky
@@ -36,9 +37,9 @@ class TipharethCommand : BaseMainCommand() {
         }
     }
 
-    @SubCommand(priority = 0.001, description = "所有物品", arguments = ["过滤?"], type = CommandType.PLAYER)
+    @SubCommand(priority = 0.001, description = "所有物品", arguments = ["过滤?", "页面?"], type = CommandType.PLAYER)
     fun list(sender: CommandSender, args: Array<String>) {
-        TipharethAPI.openMenu(sender as Player, args.getOrNull(0), 0)
+        TipharethAPI.openMenu(sender as Player, args.getOrNull(0), NumberConversions.toInt(args.getOrElse(1) { "0" }))
     }
 
     @SubCommand(priority = 0.01, description = "重载配置")
