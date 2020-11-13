@@ -89,7 +89,7 @@ object PackGenerator {
                     val name = file.name.replace(".png", "").replace(Regex("[() ]"), "").toLowerCase()
                     val json = JsonObject()
                     json.addProperty("credit", "Made with Tiphareth")
-                    json.addProperty("parent", getParent(material))
+                    json.addProperty("parent", getParent(material!!))
                     json.add("textures", run {
                         val textures = JsonObject()
                         textures.addProperty("layer0", name)

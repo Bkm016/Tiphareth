@@ -8,6 +8,8 @@ import io.izzel.taboolib.cronus.CronusUtils
 import io.izzel.taboolib.module.command.base.*
 import io.izzel.taboolib.module.lite.SimpleIterator
 import io.izzel.taboolib.util.ArrayUtil
+import io.izzel.taboolib.util.item.Items
+import io.izzel.taboolib.util.lite.Materials
 import org.bukkit.Bukkit
 import org.bukkit.Sound
 import org.bukkit.command.Command
@@ -31,15 +33,24 @@ class TipharethCommand : BaseMainCommand() {
 
         override fun getDescription(): String = "获取物品"
 
-        override fun onCommand(sender: CommandSender?, p1: Command?, p2: String?, args: Array<out String>?) {
+        override fun onCommand(sender: CommandSender, p1: Command, p2: String, args: Array<out String>) {
             val pack = PackLoader.getByName(ArrayUtil.arrayJoin(args, 0)) ?: return
             CronusUtils.addItem(sender as Player, pack.buildItem())
         }
     }
 
-    @SubCommand(priority = 0.001, description = "所有物品", arguments = ["过滤?", "页面?"], type = CommandType.PLAYER)
+    @SubCommand(priority = 0.001, description = "所有物品", arguments = ["页面?"], type = CommandType.PLAYER)
     fun list(sender: CommandSender, args: Array<String>) {
-        TipharethAPI.openMenu(sender as Player, args.getOrNull(0), NumberConversions.toInt(args.getOrElse(1) { "0" }))
+        TipharethAPI.openMenu(sender as Player, NumberConversions.toInt(args.getOrElse(0) { "0" }))
+    }
+
+    @SubCommand(priority = 0.001, description = "所有物品", arguments = ["材质?", "页面?"], type = CommandType.PLAYER)
+    fun sublist(sender: CommandSender, args: Array<String>) {
+        if (args.isEmpty()) {
+            TipharethAPI.openMenu(sender as Player, null, 0)
+        } else {
+            TipharethAPI.openMenu(sender as Player, Items.asMaterial(args[0]), NumberConversions.toInt(args.getOrElse(1) { "0" }))
+        }
     }
 
     @SubCommand(priority = 0.01, description = "重载配置")
@@ -52,10 +63,17 @@ class TipharethCommand : BaseMainCommand() {
         })
     }
 
-    @SubCommand(priority = 0.1, description = "获取资源包")
+    @SubCommand(priority = 0.1, description = "更新资源包")
     fun refresh(sender: CommandSender, args: Array<String>) {
         if (sender is Player) {
             PackDispatcher.send(sender)
+        }
+    }
+
+    @SubCommand(priority = 0.1, description = "更新所有玩家的资源包")
+    fun refreshAll(sender: CommandSender, args: Array<String>) {
+        Bukkit.getOnlinePlayers().forEach {
+            PackDispatcher.send(it)
         }
     }
 
