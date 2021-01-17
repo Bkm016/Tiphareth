@@ -4,19 +4,14 @@ import com.google.common.collect.Maps;
 import ink.ptms.tiphareth.pack.*;
 import io.izzel.taboolib.cronus.CronusUtils;
 import io.izzel.taboolib.kotlin.Indexed;
-import io.izzel.taboolib.module.lite.SimpleIterator;
 import io.izzel.taboolib.util.item.ItemBuilder;
 import io.izzel.taboolib.util.item.Items;
 import io.izzel.taboolib.util.item.inventory.ClickType;
 import io.izzel.taboolib.util.item.inventory.MenuBuilder;
-import io.izzel.taboolib.util.lite.Numbers;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Comparator;
 import java.util.List;
@@ -57,7 +52,7 @@ public class TipharethAPI {
                     for (int i = 0; i < objectsSorted.size(); i++) {
                         objectsMap.put(Items.INVENTORY_CENTER[i], objectsSorted.get(i).getKey());
                         inventory.setItem(Items.INVENTORY_CENTER[i], new ItemBuilder(objectsSorted.get(i).getKey())
-                                .name(Tiphareth.CONF.getString("group-name." + objectsSorted.get(i).getKey().name()))
+                                .name(Tiphareth.INSTANCE.getConf().getString("group-name." + objectsSorted.get(i).getKey().name()))
                                 .flags(ItemFlag.values())
                                 .build());
                     }

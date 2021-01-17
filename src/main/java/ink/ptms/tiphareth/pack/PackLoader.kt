@@ -24,7 +24,7 @@ object PackLoader {
 
     fun loadItem(file: File): List<PackObject> {
         if (file.isDirectory) {
-            return file.listFiles().flatMap { loadItem(it) }.toList()
+            return file.listFiles()?.flatMap { loadItem(it) }?.toList() ?: emptyList()
         } else if (file.name.endsWith(".yml")) {
             return listOf(PackObject(file, PackType.ITEM))
         }

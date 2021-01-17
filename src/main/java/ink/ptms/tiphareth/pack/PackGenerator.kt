@@ -5,9 +5,12 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import ink.ptms.tiphareth.Tiphareth
+import ink.ptms.tiphareth.pack.PackGenerator.checkPlaceholder
+import io.izzel.taboolib.internal.apache.lang3.time.DateFormatUtils
 import io.izzel.taboolib.module.db.local.Local
 import io.izzel.taboolib.util.Files
 import io.izzel.taboolib.util.IO
+import io.izzel.taboolib.util.Strings
 import io.izzel.taboolib.util.item.Items
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
@@ -15,6 +18,8 @@ import org.bukkit.util.NumberConversions
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import java.util.ArrayList
@@ -36,12 +41,29 @@ object PackGenerator {
         // pack folder
         val folderModels = Files.folder(folder, "assets/minecraft/models")
         val folderTextures = Files.folder(folder, "assets/minecraft/textures")
+        // placeholder
+        val time = System.currentTimeMillis()
+        val mcmeta = Files.file(folder, "pack.mcmeta").readText(StandardCharsets.UTF_8).checkPlaceholder(time)
+        Files.write(Files.file(folder, "pack.mcmeta")) {
+            it.write(mcmeta)
+        }
+        Files.folder(folder, "assets/minecraft/lang").listFiles()?.forEach { file ->
+            val str = file.readText(StandardCharsets.UTF_8).checkPlaceholder(time)
+            Files.write(file) {
+                it.write(str)
+            }
+        }
         // generate pack model
         val mapItem = Maps.newHashMap<String, PackModel>()
         packObject.forEach { pack ->
             when (pack.packType) {
                 PackType.ITEM -> {
-                    mapItem.computeIfAbsent(pack.getModelName()) { PackModel(getParent(pack.item!!.type), pack.getTextures()) }.packOverride.add(PackOverride(pack.getPackName(), generateCustomData(pack)))
+                    mapItem.computeIfAbsent(pack.getModelName()) { PackModel(getParent(pack.item!!.type), pack.getTextures()) }.packOverride.add(
+                        PackOverride(
+                            pack.getPackName(),
+                            generateCustomData(pack)
+                        )
+                    )
                 }
             }
         }
@@ -73,7 +95,7 @@ object PackGenerator {
         // generate zip
         FileOutputStream(file()).use { fileOutputStream ->
             ZipOutputStream(fileOutputStream).use { zipOutputStream ->
-                folder.listFiles().forEach { toZip(zipOutputStream, it, "") }
+                folder.listFiles()?.forEach { toZip(zipOutputStream, it, "") }
             }
         }
         Files.deepDelete(folder)
@@ -82,9 +104,9 @@ object PackGenerator {
     fun generateNoModels() {
         val folderIn = Files.folder(Tiphareth.getPlugin().dataFolder, "pack/item#pre")
         val folderOut = Files.folder(Tiphareth.getPlugin().dataFolder, "pack/item/generated")
-        folderIn.listFiles().filter { it.isDirectory }.forEach { materialFile ->
+        folderIn.listFiles()?.filter { it.isDirectory }?.forEach { materialFile ->
             val material = Items.asMaterial(materialFile.name)
-            materialFile.listFiles().forEach { file ->
+            materialFile.listFiles()?.forEach { file ->
                 if (file.name.endsWith(".png")) {
                     val name = file.name.replace(".png", "").replace(Regex("[() ]"), "").toLowerCase()
                     val json = JsonObject()
@@ -137,7 +159,7 @@ object PackGenerator {
 
     private fun toZip(zipOutputStream: ZipOutputStream, file: File, path: String) {
         if (file.isDirectory) {
-            file.listFiles().forEach { toZip(zipOutputStream, it, "$path${file.name}/") }
+            file.listFiles()?.forEach { toZip(zipOutputStream, it, "$path${file.name}/") }
         } else {
             FileInputStream(file).use { fileInputStream ->
                 zipOutputStream.putNextEntry(ZipEntry(path + file.name))
@@ -154,7 +176,7 @@ object PackGenerator {
 
     private fun getSourceFiles(fromFile: File): List<File> {
         val fileList = ArrayList<File>()
-        for (file in fromFile.listFiles()) {
+        fromFile.listFiles()?.forEach { file ->
             if (file.isFile) {
                 fileList.add(file)
             } else {
@@ -162,5 +184,11 @@ object PackGenerator {
             }
         }
         return fileList
+    }
+
+    private fun String.checkPlaceholder(time: Long): String {
+        return this
+            .replace("@date", DateFormatUtils.format(System.currentTimeMillis(), "yyyy/MM/dd"))
+            .replace("@hash", Strings.hashKeyForDisk(time.toString()).substring(0, 8))
     }
 }
