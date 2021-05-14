@@ -5,10 +5,6 @@ import java.io.FileInputStream
 import java.security.MessageDigest
 import java.util.*
 
-/**
- * @Author sky
- * @Since 2019-11-28 22:45
- */
 object Utils {
 
     fun getHashCode(file: File): String? {

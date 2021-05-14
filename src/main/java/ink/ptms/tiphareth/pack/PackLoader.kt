@@ -12,22 +12,27 @@ object PackLoader {
     fun getByName(name: String): PackObject? = items.firstOrNull { it.getPackName() == name }
 
     fun loadItems(): List<PackObject> {
-        if (File(Tiphareth.getPlugin().dataFolder, "pack").exists()) {
-            return loadItem(Files.folder(Tiphareth.getPlugin().dataFolder, "pack/item"))
+        if (File(Tiphareth.plugin.dataFolder, "pack").exists()) {
+            return loadItem(Files.folder(Tiphareth.plugin.dataFolder, "pack/item"))
         }
-        Tiphareth.getPlugin().saveResource("pack/pack.mcmeta", true)
-        Tiphareth.getPlugin().saveResource("pack/pack.png", true)
-        Tiphareth.getPlugin().saveResource("pack/item/diamond_sword_1_1.png", true)
-        Tiphareth.getPlugin().saveResource("pack/item/diamond_sword_1_1.yml", true)
+        Tiphareth.plugin.saveResource("pack/pack.mcmeta", true)
+        Tiphareth.plugin.saveResource("pack/pack.png", true)
+        Tiphareth.plugin.saveResource("pack/item/diamond_sword_1_1.png", true)
+        Tiphareth.plugin.saveResource("pack/item/diamond_sword_1_1.yml", true)
         return loadItems()
     }
 
     fun loadItem(file: File): List<PackObject> {
-        if (file.isDirectory) {
-            return file.listFiles()?.flatMap { loadItem(it) }?.toList() ?: emptyList()
-        } else if (file.name.endsWith(".yml")) {
-            return listOf(PackObject(file, PackType.ITEM))
+        return when {
+            file.isDirectory -> {
+                file.listFiles()?.flatMap { loadItem(it) }?.toList() ?: emptyList()
+            }
+            file.name.endsWith(".yml") -> {
+                listOf(PackObject(file, PackType.ITEM))
+            }
+            else -> {
+                emptyList()
+            }
         }
-        return emptyList()
     }
 }

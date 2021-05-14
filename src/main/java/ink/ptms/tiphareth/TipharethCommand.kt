@@ -17,10 +17,6 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.util.NumberConversions
 
-/**
- * @Author sky
- * @Since 2019-11-25 14:55
- */
 @BaseCommand(name = "tiphareth", aliases = ["th"], permission = "tiphareth.admin")
 class TipharethCommand : BaseMainCommand() {
 
@@ -41,15 +37,15 @@ class TipharethCommand : BaseMainCommand() {
 
     @SubCommand(priority = 0.001, description = "所有物品", arguments = ["页面?"], type = CommandType.PLAYER)
     fun list(sender: CommandSender, args: Array<String>) {
-        TipharethAPI.openMenu(sender as Player, NumberConversions.toInt(args.getOrElse(0) { "0" }))
+        TipharethItemList.openMenu(sender as Player, NumberConversions.toInt(args.getOrElse(0) { "0" }))
     }
 
     @SubCommand(priority = 0.001, description = "所有物品", arguments = ["材质?", "页面?"], type = CommandType.PLAYER)
     fun sublist(sender: CommandSender, args: Array<String>) {
         if (args.isEmpty()) {
-            TipharethAPI.openMenu(sender as Player, null, 0)
+            TipharethItemList.openMenu(sender as Player, null, 0)
         } else {
-            TipharethAPI.openMenu(sender as Player, Items.asMaterial(args[0]), NumberConversions.toInt(args.getOrElse(1) { "0" }))
+            TipharethItemList.openMenu(sender as Player, Items.asMaterial(args[0]), NumberConversions.toInt(args.getOrElse(1) { "0" }))
         }
     }
 

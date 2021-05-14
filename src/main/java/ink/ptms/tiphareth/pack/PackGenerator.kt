@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import ink.ptms.tiphareth.Tiphareth
-import ink.ptms.tiphareth.pack.PackGenerator.checkPlaceholder
 import io.izzel.taboolib.internal.apache.lang3.time.DateFormatUtils
 import io.izzel.taboolib.module.db.local.Local
 import io.izzel.taboolib.util.Files
@@ -14,30 +13,29 @@ import io.izzel.taboolib.util.Strings
 import io.izzel.taboolib.util.item.Items
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.util.NumberConversions
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.charset.StandardCharsets
-import java.text.SimpleDateFormat
+import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import java.util.ArrayList
-
 
 object PackGenerator {
 
-    fun file(): File = Files.file(File(Tiphareth.getPlugin().dataFolder, "tiphareth-pack.zip"))
+    fun file(): File = Files.file(File(Tiphareth.plugin.dataFolder, "tiphareth-pack.zip"))
 
     fun generate(packObject: List<PackObject>) {
-        val folder = Files.folder(Tiphareth.getPlugin().dataFolder, "tiphareth-pack")
+        val folder = Files.folder(Tiphareth.plugin.dataFolder, "tiphareth-pack")
         Files.deepDelete(folder)
         Files.folder(folder)
         // pack info
-        Files.copy(File(Tiphareth.getPlugin().dataFolder, "pack/pack.mcmeta"), Files.file(folder, "pack.mcmeta"))
-        Files.copy(File(Tiphareth.getPlugin().dataFolder, "pack/pack.png"), Files.file(folder, "pack.png"))
+        Files.copy(File(Tiphareth.plugin.dataFolder, "pack/pack.mcmeta"), Files.file(folder, "pack.mcmeta"))
+        Files.copy(File(Tiphareth.plugin.dataFolder, "pack/pack.png"), Files.file(folder, "pack.png"))
         // pack resources
-        Files.deepCopy(Files.folder(Tiphareth.getPlugin().dataFolder, "pack/resources").path, Files.folder(folder, "assets/minecraft").path)
+        val resources = File(Tiphareth.plugin.dataFolder, "pack/resources")
+        resources.mkdirs()
+        Files.deepCopy(resources.path, Files.folder(folder, "assets").path)
         // pack folder
         val folderModels = Files.folder(folder, "assets/minecraft/models")
         val folderTextures = Files.folder(folder, "assets/minecraft/textures")
@@ -56,9 +54,10 @@ object PackGenerator {
         // generate pack model
         val mapItem = Maps.newHashMap<String, PackModel>()
         packObject.forEach { pack ->
+            val material = pack.item!!.type
             when (pack.packType) {
                 PackType.ITEM -> {
-                    mapItem.computeIfAbsent(pack.getModelName()) { PackModel(getParent(pack.item!!.type), pack.getTextures()) }.packOverride.add(
+                    mapItem.computeIfAbsent(pack.getModelName()) { PackModel(material, getParent(material), pack.getTextures()) }.packOverride.add(
                         PackOverride(
                             pack.getPackName(),
                             generateCustomData(pack)
@@ -72,7 +71,11 @@ object PackGenerator {
             json.addProperty("parent", entry.value.parent)
             val textures = JsonObject()
             entry.value.textures.forEachIndexed { index, texture ->
-                textures.addProperty("layer$index", "item/$texture")
+                if (entry.value.material.isBlock) {
+                    textures.addProperty("layer$index", "block/$texture")
+                } else {
+                    textures.addProperty("layer$index", "item/$texture")
+                }
             }
             json.add("textures", textures)
             val overrides = JsonArray()
@@ -102,8 +105,8 @@ object PackGenerator {
     }
 
     fun generateNoModels() {
-        val folderIn = Files.folder(Tiphareth.getPlugin().dataFolder, "pack/item#pre")
-        val folderOut = Files.folder(Tiphareth.getPlugin().dataFolder, "pack/item/generated")
+        val folderIn = Files.folder(Tiphareth.plugin.dataFolder, "pack/item#pre")
+        val folderOut = Files.folder(Tiphareth.plugin.dataFolder, "pack/item/generated")
         folderIn.listFiles()?.filter { it.isDirectory }?.forEach { materialFile ->
             val material = Items.asMaterial(materialFile.name)
             materialFile.listFiles()?.forEach { file ->
@@ -153,6 +156,9 @@ object PackGenerator {
         }
         if (material == Material.FISHING_ROD) {
             return "item/handheld_rod"
+        }
+        if (material == Material.SHIELD) {
+            return "builtin/entity"
         }
         return "item/generated"
     }

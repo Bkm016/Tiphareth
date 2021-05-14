@@ -6,10 +6,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 
-/**
- * @Author sky
- * @Since 2019-11-26 12:30
- */
 @TListener
 class Events : Listener {
 

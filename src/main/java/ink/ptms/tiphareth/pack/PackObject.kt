@@ -7,10 +7,6 @@ import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.PotionMeta
 import java.io.File
 
-/**
- * @Author sky
- * @Since 2019-11-25 15:04
- */
 class PackObject(val packFile: File, val packType: PackType) {
 
     var isHide: Boolean = false
