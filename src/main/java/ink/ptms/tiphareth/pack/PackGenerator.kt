@@ -82,7 +82,17 @@ object PackGenerator {
             entry.value.packOverride.sortedBy { it.customData }.forEach { override ->
                 val overridesJson = JsonObject()
                 val predicateJson = JsonObject()
-                predicateJson.addProperty("custom_model_data", override.customData)
+                // 鱼竿
+                if (entry.value.material == Material.FISHING_ROD && override.name.endsWith("_cast")) {
+                    val parentName = override.name.substring(0, override.name.length - "_cast".length)
+                    val parentOverride = entry.value.packOverride.firstOrNull { it.name == parentName }
+                    if (parentOverride != null) {
+                        predicateJson.addProperty("custom_model_data", parentOverride.customData)
+                        predicateJson.addProperty("cast", 1)
+                    }
+                } else {
+                    predicateJson.addProperty("custom_model_data", override.customData)
+                }
                 overridesJson.addProperty("model", override.name)
                 overridesJson.add("predicate", predicateJson)
                 overrides.add(overridesJson)
@@ -112,15 +122,28 @@ object PackGenerator {
             materialFile.listFiles()?.forEach { file ->
                 if (file.name.endsWith(".png")) {
                     val name = file.name.replace(".png", "").replace(Regex("[() ]"), "").toLowerCase()
+                    val conf = YamlConfiguration()
                     val json = JsonObject()
                     json.addProperty("credit", "Made with Tiphareth")
-                    json.addProperty("parent", getParent(material!!))
+                    when (material) {
+                        Material.FISHING_ROD -> {
+                            if (name.endsWith("_cast")) {
+                                val parent = name.substring(0, name.length - "_cast".length)
+                                json.addProperty("parent", parent)
+                                conf.set("item.hide", true)
+                            } else {
+                                json.addProperty("parent", "item/handheld_rod")
+                            }
+                        }
+                        else -> {
+                            json.addProperty("parent", getParent(material!!))
+                        }
+                    }
                     json.add("textures", run {
                         val textures = JsonObject()
                         textures.addProperty("layer0", name)
                         return@run textures
                     })
-                    val conf = YamlConfiguration()
                     conf.set("item.material", material.toString())
                     conf.set("item.name", name)
                     conf.set("item.lore", listOf("", "Made with Tiphareth"))
