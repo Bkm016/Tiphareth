@@ -9,6 +9,7 @@ import taboolib.module.ui.openMenu
 import taboolib.module.ui.type.Linked
 import taboolib.platform.util.buildItem
 import taboolib.platform.util.giveItem
+import taboolib.platform.util.inventoryCenterSlots
 
 object TipharethItemList {
 
@@ -18,6 +19,7 @@ object TipharethItemList {
         player.openMenu<Linked<Material>>("Tiphareth Items - %p") {
             setProperty("page", page)
             rows(6)
+            slots(inventoryCenterSlots)
             elements {
                 objects.keys.toList()
             }
@@ -52,6 +54,7 @@ object TipharethItemList {
         player.openMenu<Linked<String>>("Tiphareth Items - $material - %p") {
             setProperty("page", page)
             rows(6)
+            slots(inventoryCenterSlots)
             elements {
                 objects.map { it.getPackName() }.toList()
             }
