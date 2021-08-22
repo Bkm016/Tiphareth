@@ -1,66 +1,67 @@
 package ink.ptms.tiphareth.pack
 
-import io.izzel.taboolib.util.Files
-import io.izzel.taboolib.util.item.Items
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.PotionMeta
+import taboolib.common.io.newFile
+import taboolib.library.xseries.XItemStack
+import taboolib.module.configuration.SecuredFile
 import java.io.File
 
 class PackObject(val packFile: File, val packType: PackType) {
 
-    var isHide: Boolean = false
-        private set
+    val root = SecuredFile.loadConfiguration(packFile)
 
-    var item: ItemStack? = null
-        private set
+    val item = XItemStack.deserialize(root.getConfigurationSection("item"))!!
 
-    var model: String? = null
-        private set
+    val itemHide = root.getBoolean("item.hide")
 
-    init {
-        val conf = Files.loadYaml(packFile)
-        isHide = conf.getBoolean("item.hide")
-        item = Items.loadItem(conf.getConfigurationSection("item"))
-        model = conf.getString("model")
+    val model = root.getString("model")!!
+
+    fun getPackName(): String {
+        return packFile.name.replace(".yml", "")
     }
 
-    fun getPackName(): String = packFile.name.replace(".yml", "")
-
-    fun getModelName(): String = item!!.type.toString().toLowerCase()
+    fun getModelName(): String {
+        return item.type.toString().toLowerCase()
+    }
 
     fun getTextures(): List<String> {
         val textures = arrayListOf<String>()
         textures.add(getModelName())
-        if (item!!.itemMeta is LeatherArmorMeta || item!!.itemMeta is PotionMeta) {
+        if (item.itemMeta is LeatherArmorMeta || item.itemMeta is PotionMeta) {
             textures.add(getModelName() + "_overlay")
         }
         return textures
     }
 
-    fun getIconFile(): File = File(packFile.parent, packFile.name.replace(".yml", ".png"))
+    fun getIconFile(): File {
+        return File(packFile.parent, packFile.name.replace(".yml", ".png"))
+    }
 
-    fun getMetaFile(): File = File(packFile.parent, packFile.name.replace(".yml", ".png") + ".mcmeta")
+    fun getMetaFile(): File {
+        return File(packFile.parent, packFile.name.replace(".yml", ".png") + ".mcmeta")
+    }
 
     fun generateModel(folderModel: File) {
-        Files.toFile(model, Files.file(folderModel, packFile.name.replace(".yml", ".json")))
+        newFile(folderModel, packFile.name.replace(".yml", ".json")).writeText(model)
     }
 
     fun generateTexture(folderTexture: File) {
         getIconFile().run {
-            if (this.exists()) {
-                Files.copy(this, Files.file(folderTexture, this.name))
+            if (exists()) {
+                copyTo(newFile(folderTexture, this.name))
             }
         }
         getMetaFile().run {
-            if (this.exists()) {
-                Files.copy(this, Files.file(folderTexture, this.name))
+            if (exists()) {
+                copyTo(newFile(folderTexture, this.name))
             }
         }
     }
 
     fun buildItem(): ItemStack {
-        val item = item!!.clone()
+        val item = item.clone()
         try {
             val meta = item.itemMeta!!
             meta.setCustomModelData(PackGenerator.generateCustomData(this))
@@ -73,8 +74,6 @@ class PackObject(val packFile: File, val packType: PackType) {
     }
 
     override fun toString(): String {
-        return "PackObject(packFile=$packFile, packType=$packType, isHide=$isHide, item=$item, model=$model)"
+        return "PackObject(packFile=$packFile, packType=$packType, isHide=$itemHide, item=$item, model=$model)"
     }
-
-
 }

@@ -2,35 +2,38 @@ package ink.ptms.tiphareth.pack
 
 import com.google.common.collect.Lists
 import ink.ptms.tiphareth.Tiphareth
-import io.izzel.taboolib.module.locale.TLocale
-import io.izzel.taboolib.module.packet.Packet
-import io.izzel.taboolib.module.packet.TPacket
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.metadata.FixedMetadataValue
+import taboolib.common.platform.event.SubscribeEvent
+import taboolib.common.platform.function.info
+import taboolib.common.platform.function.submit
+import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.PacketReceiveEvent
+import taboolib.platform.BukkitPlugin
+import taboolib.platform.util.asLangText
 
 object PackDispatcher {
 
-    private val dispatchPlayer = Lists.newArrayList<String>()
+    internal val dispatchPlayer = Lists.newArrayList<String>()
 
-    @TPacket(type = TPacket.Type.RECEIVE)
-    private fun send(player: Player, packet: Packet): Boolean {
-        if (packet.`is`("PacketPlayInPosition") && !dispatchPlayer.contains(player.name) && Tiphareth.conf.getBoolean("automatically-dispatch.dispatch")) {
-            dispatchPlayer.add(player.name)
-            Bukkit.getScheduler().runTask(Tiphareth.plugin, Runnable {
-                send(player)
-            })
+    @SubscribeEvent
+    internal fun e(e: PacketReceiveEvent) {
+        if (e.packet.name == "PacketPlayInPosition" && !dispatchPlayer.contains(e.player.name) && Tiphareth.conf.getBoolean("automatically-dispatch.dispatch")) {
+            dispatchPlayer.add(e.player.name)
+            submit {
+                send(e.player)
+            }
         }
-        if (packet.`is`("PacketPlayInResourcePackStatus")) {
-            println("[Tiphareth] PacketPlayInResourcePackStatus of ${player.name} -> ${packet.read("status")}")
-            Bukkit.getScheduler().runTask(Tiphareth.plugin, Runnable {
-                when (packet.read("status").toString()) {
-                    "DECLINED", "FAILED_DOWNLOAD" -> player.kickPlayer(TLocale.asString("force-to-accept"))
-                    "ACCEPTED", "SUCCESSFULLY_LOADED" -> player.setMetadata("tiphareth:pack-accept", FixedMetadataValue(Tiphareth.plugin, true))
+        if (e.packet.name == "PacketPlayInResourcePackStatus") {
+            val status = e.packet.read<Any>(if (MinecraftVersion.isUniversal) "a" else "status").toString()
+            info("PacketPlayInResourcePackStatus : ${e.player.name} -> $status")
+            submit {
+                when (status) {
+                    "DECLINED", "FAILED_DOWNLOAD" -> e.player.kickPlayer(e.player.asLangText("force-to-accept"))
+                    "ACCEPTED", "SUCCESSFULLY_LOADED" -> e.player.setMetadata("tiphareth:pack-accept", FixedMetadataValue(BukkitPlugin.getInstance(), true))
                 }
-            })
+            }
         }
-        return true
     }
 
     fun send(player: Player) {
@@ -39,29 +42,35 @@ object PackDispatcher {
         }
         val url = if (PackUploader.isEnable) PackUploader.getPackURL() else getFileURL()
         if (url != null) {
-            player.removeMetadata("tiphareth:pack-accept", Tiphareth.plugin)
+            player.removeMetadata("tiphareth:pack-accept", BukkitPlugin.getInstance())
             player.setResourcePack(url)
-            Bukkit.getScheduler().runTaskLater(Tiphareth.plugin, Runnable {
+            submit(delay = getForceToAcceptTimeout() * 20L) {
                 if (player.hasMetadata("tiphareth:pack-accept") || !player.isOnline) {
-                    return@Runnable
+                    return@submit
                 }
-                player.kickPlayer(TLocale.asString("force-to-accept"))
-            }, getForceToAcceptTimeout() * 20L)
+                player.kickPlayer(player.asLangText("force-to-accept"))
+            }
         }
     }
 
     fun release(player: Player) {
         dispatchPlayer.remove(player.name)
-        player.removeMetadata("tiphareth:pack-accept", Tiphareth.plugin)
+        player.removeMetadata("tiphareth:pack-accept", BukkitPlugin.getInstance())
     }
 
-    private fun getFileURL(): String? = Tiphareth.conf.getString("automatically-dispatch.file-url")
+    private fun getFileURL(): String? {
+        return Tiphareth.conf.getString("automatically-dispatch.file-url")
+    }
 
-    private fun isForceToAccept(): Boolean = Tiphareth.conf.getBoolean("automatically-dispatch.force-to-accept")
+    private fun isForceToAccept(): Boolean {
+        return Tiphareth.conf.getBoolean("automatically-dispatch.force-to-accept")
+    }
 
-    private fun getForceToAcceptTimeout(): Int = Tiphareth.conf.getInt("automatically-dispatch.force-to-accept-timeout")
+    private fun getForceToAcceptTimeout(): Int {
+        return Tiphareth.conf.getInt("automatically-dispatch.force-to-accept-timeout")
+    }
 
-    private fun isForceToAcceptPermissionBypass(): Boolean = Tiphareth.conf.getBoolean("automatically-dispatch.force-to-accept-permission-bypass")
-
-
+    private fun isForceToAcceptPermissionBypass(): Boolean {
+        return Tiphareth.conf.getBoolean("automatically-dispatch.force-to-accept-permission-bypass")
+    }
 }

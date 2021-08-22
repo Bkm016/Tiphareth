@@ -1,28 +1,25 @@
 package ink.ptms.tiphareth.event
 
-import io.izzel.taboolib.module.event.EventNormal
-import io.izzel.taboolib.module.inject.TInject
-import io.izzel.taboolib.module.packet.Packet
-import io.izzel.taboolib.module.packet.TPacketListener
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerResourcePackStatusEvent
+import taboolib.common.platform.event.SubscribeEvent
+import taboolib.module.nms.MinecraftVersion
+import taboolib.module.nms.PacketReceiveEvent
+import taboolib.platform.type.BukkitProxyEvent
 
 /**
  * @Author sky
  * @Since 2019-12-14 23:20
  */
-class AsyncResourceLoadedEvent(val player: Player) : EventNormal<AsyncResourceLoadedEvent>() {
+class AsyncResourceLoadedEvent(val player: Player) : BukkitProxyEvent() {
 
     companion object {
 
-        @TInject
-        val packet = object : TPacketListener() {
-
-            override fun onReceive(player: Player, packet: Packet): Boolean {
-                if (packet.`is`("PacketPlayInResourcePackStatus") && packet.read("status").toString() == "SUCCESSFULLY_LOADED") {
-                    AsyncResourceLoadedEvent(player).async(true).call()
+        @SubscribeEvent
+        fun e(e: PacketReceiveEvent) {
+            if (e.packet.name == "PacketPlayInResourcePackStatus") {
+                if (e.packet.read<Any>(if (MinecraftVersion.isUniversal) "a" else "status").toString() == "SUCCESSFULLY_LOADED") {
+                    AsyncResourceLoadedEvent(e.player).call()
                 }
-                return true
             }
         }
     }

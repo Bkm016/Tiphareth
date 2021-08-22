@@ -1,24 +1,26 @@
 package ink.ptms.tiphareth.pack
 
 import com.google.common.collect.Lists
-import ink.ptms.tiphareth.Tiphareth
-import io.izzel.taboolib.util.Files
+import taboolib.common.platform.function.getDataFolder
+import taboolib.common.platform.function.releaseResourceFile
 import java.io.File
 
 object PackLoader {
 
     val items: MutableList<PackObject> = Lists.newArrayList()
 
-    fun getByName(name: String): PackObject? = items.firstOrNull { it.getPackName() == name }
+    fun getByName(name: String): PackObject? {
+        return items.firstOrNull { it.getPackName() == name }
+    }
 
     fun loadItems(): List<PackObject> {
-        if (File(Tiphareth.plugin.dataFolder, "pack").exists()) {
-            return loadItem(Files.folder(Tiphareth.plugin.dataFolder, "pack/item"))
+        if (File(getDataFolder(), "pack").exists()) {
+            return loadItem(File(getDataFolder(), "pack/item"))
         }
-        Tiphareth.plugin.saveResource("pack/pack.mcmeta", true)
-        Tiphareth.plugin.saveResource("pack/pack.png", true)
-        Tiphareth.plugin.saveResource("pack/item/diamond_sword_1_1.png", true)
-        Tiphareth.plugin.saveResource("pack/item/diamond_sword_1_1.yml", true)
+        releaseResourceFile("pack/pack.mcmeta", true)
+        releaseResourceFile("pack/pack.png", true)
+        releaseResourceFile("pack/item/diamond_sword_1_1.png", true)
+        releaseResourceFile("pack/item/diamond_sword_1_1.yml", true)
         return loadItems()
     }
 

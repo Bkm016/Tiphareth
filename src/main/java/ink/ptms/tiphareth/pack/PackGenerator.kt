@@ -4,15 +4,17 @@ import com.google.common.collect.Maps
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import ink.ptms.tiphareth.Tiphareth
-import io.izzel.taboolib.internal.apache.lang3.time.DateFormatUtils
-import io.izzel.taboolib.module.db.local.Local
-import io.izzel.taboolib.util.Files
-import io.izzel.taboolib.util.IO
-import io.izzel.taboolib.util.Strings
-import io.izzel.taboolib.util.item.Items
+import org.apache.commons.lang.time.DateFormatUtils
 import org.bukkit.Material
-import org.bukkit.configuration.file.YamlConfiguration
+import taboolib.common.io.deepCopyTo
+import taboolib.common.io.deepDelete
+import taboolib.common.io.digest
+import taboolib.common.io.newFile
+import taboolib.common.platform.function.getDataFolder
+import taboolib.library.xseries.parseToMaterial
+import taboolib.module.configuration.Local
+import taboolib.module.configuration.SecuredFile
+import taboolib.module.configuration.createLocal
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -23,33 +25,31 @@ import java.util.zip.ZipOutputStream
 
 object PackGenerator {
 
-    fun file(): File = Files.file(File(Tiphareth.plugin.dataFolder, "tiphareth-pack.zip"))
+    val mapping = createLocal("data-mapping.yml")
+
+    fun file(): File = newFile(getDataFolder(), "tiphareth-pack.zip", create = false)
 
     fun generate(packObject: List<PackObject>) {
-        val folder = Files.folder(Tiphareth.plugin.dataFolder, "tiphareth-pack")
-        Files.deepDelete(folder)
-        Files.folder(folder)
+        val folder = File(getDataFolder(), "tiphareth-pack")
+        if (folder.exists()) {
+            folder.deepDelete()
+        }
+        folder.mkdirs()
         // pack info
-        Files.copy(File(Tiphareth.plugin.dataFolder, "pack/pack.mcmeta"), Files.file(folder, "pack.mcmeta"))
-        Files.copy(File(Tiphareth.plugin.dataFolder, "pack/pack.png"), Files.file(folder, "pack.png"))
+        newFile(getDataFolder(), "pack/pack.mcmeta").copyTo(newFile(folder, "pack.mcmeta"))
+        newFile(getDataFolder(), "pack/pack.png").copyTo(newFile(folder, "pack.png"))
         // pack resources
-        val resources = File(Tiphareth.plugin.dataFolder, "pack/resources")
+        val resources = File(getDataFolder(), "pack/resources")
         resources.mkdirs()
-        Files.deepCopy(resources.path, Files.folder(folder, "assets").path)
+        resources.deepCopyTo(File(folder, "assets"))
         // pack folder
-        val folderModels = Files.folder(folder, "assets/minecraft/models")
-        val folderTextures = Files.folder(folder, "assets/minecraft/textures")
+        val folderModels = File(folder, "assets/minecraft/models").also { it.mkdirs() }
+        val folderTextures = File(folder, "assets/minecraft/textures").also { it.mkdirs() }
         // placeholder
         val time = System.currentTimeMillis()
-        val mcmeta = Files.file(folder, "pack.mcmeta").readText(StandardCharsets.UTF_8).checkPlaceholder(time)
-        Files.write(Files.file(folder, "pack.mcmeta")) {
-            it.write(mcmeta)
-        }
-        Files.folder(folder, "assets/minecraft/lang").listFiles()?.forEach { file ->
-            val str = file.readText(StandardCharsets.UTF_8).checkPlaceholder(time)
-            Files.write(file) {
-                it.write(str)
-            }
+        newFile(folder, "pack.mcmeta").writeText(newFile(folder, "pack.mcmeta").readText().checkPlaceholder(time))
+        File(folder, "assets/minecraft/lang").listFiles()?.forEach { file ->
+            file.writeText(file.readText().checkPlaceholder(time))
         }
         // generate pack model
         val mapItem = Maps.newHashMap<String, PackModel>()
@@ -98,7 +98,7 @@ object PackGenerator {
                 overrides.add(overridesJson)
             }
             json.add("overrides", overrides)
-            Files.toFile(GsonBuilder().setPrettyPrinting().create().toJson(json), Files.file(Files.folder(folderModels, "item"), entry.key + ".json"))
+            newFile(File(folderModels, "item"), entry.key + ".json").writeText(GsonBuilder().setPrettyPrinting().create().toJson(json))
         }
         // generate pack object
         packObject.forEach { pack ->
@@ -111,18 +111,18 @@ object PackGenerator {
                 folder.listFiles()?.forEach { toZip(zipOutputStream, it, "") }
             }
         }
-        Files.deepDelete(folder)
+        folder.deepDelete()
     }
 
     fun generateNoModels() {
-        val folderIn = Files.folder(Tiphareth.plugin.dataFolder, "pack/item#pre")
-        val folderOut = Files.folder(Tiphareth.plugin.dataFolder, "pack/item/generated")
+        val folderIn = File(getDataFolder(), "pack/item#pre")
+        val folderOut = File(getDataFolder(), "pack/item/generated")
         folderIn.listFiles()?.filter { it.isDirectory }?.forEach { materialFile ->
-            val material = Items.asMaterial(materialFile.name)
+            val material = materialFile.name.parseToMaterial()
             materialFile.listFiles()?.forEach { file ->
                 if (file.name.endsWith(".png")) {
                     val name = file.name.replace(".png", "").replace(Regex("[() ]"), "").toLowerCase()
-                    val conf = YamlConfiguration()
+                    val conf = SecuredFile()
                     val json = JsonObject()
                     json.addProperty("credit", "Made with Tiphareth")
                     when (material) {
@@ -136,7 +136,7 @@ object PackGenerator {
                             }
                         }
                         else -> {
-                            json.addProperty("parent", getParent(material!!))
+                            json.addProperty("parent", getParent(material))
                         }
                     }
                     json.add("textures", run {
@@ -148,10 +148,10 @@ object PackGenerator {
                     conf.set("item.name", name)
                     conf.set("item.lore", listOf("", "Made with Tiphareth"))
                     conf.set("model", GsonBuilder().setPrettyPrinting().create().toJson(json))
-                    Files.copy(file, Files.file(folderOut, "$name.png"))
-                    Files.toFile(conf.saveToString(), Files.file(folderOut, "$name.yml"))
+                    file.copyTo(newFile(folderOut, "$name.png"))
+                    newFile(folderOut, "$name.yml").writeText(conf.saveToString())
                     if (File(file.parentFile, file.name + ".mcmeta").exists()) {
-                        Files.copy(File(file.parentFile, file.name + ".mcmeta"), Files.file(folderOut, "$name.png.mcmeta"))
+                        File(file.parentFile, file.name + ".mcmeta").copyTo(newFile(folderOut, "$name.png.mcmeta"))
                     }
                 }
             }
@@ -161,7 +161,6 @@ object PackGenerator {
     // 16777215
     fun generateCustomData(pack: PackObject): Int {
         val material = pack.item?.type?.name ?: "unknown"
-        val mapping = Local.get().get("data-mapping")
         if (mapping.contains("$material.${pack.getPackName()}")) {
             return mapping.getInt("$material.${pack.getPackName()}")
         }
@@ -192,7 +191,7 @@ object PackGenerator {
         } else {
             FileInputStream(file).use { fileInputStream ->
                 zipOutputStream.putNextEntry(ZipEntry(path + file.name))
-                zipOutputStream.write(IO.readFully(fileInputStream))
+                zipOutputStream.write(fileInputStream.readBytes())
                 zipOutputStream.flush()
                 zipOutputStream.closeEntry()
             }
@@ -218,6 +217,6 @@ object PackGenerator {
     private fun String.checkPlaceholder(time: Long): String {
         return this
             .replace("@date", DateFormatUtils.format(System.currentTimeMillis(), "yyyy/MM/dd"))
-            .replace("@hash", Strings.hashKeyForDisk(time.toString()).substring(0, 8))
+            .replace("@hash", time.toString().digest("sha-1").substring(0, 8))
     }
 }
