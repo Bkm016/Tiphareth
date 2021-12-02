@@ -1,7 +1,7 @@
 plugins {
     `java-library`
     `maven-publish`
-    id("io.izzel.taboolib") version "1.26"
+    id("io.izzel.taboolib") version "1.31"
     id("org.jetbrains.kotlin.jvm") version "1.5.10"
 }
 
@@ -20,7 +20,7 @@ taboolib {
     install("module-ui")
     install("platform-bukkit")
     classifier = null
-    version = "6.0.4-3"
+    version = "6.0.6-8"
 }
 
 repositories {
@@ -28,8 +28,10 @@ repositories {
 }
 
 dependencies {
-    compileOnly("ink.ptms.core:v11701:11701:universal")
-    compileOnly("ink.ptms.core:v11605:11605")
+    compileOnly("com.google.guava:guava:31.0.1-jre")
+    compileOnly("com.google.code.gson:gson:2.8.9")
+    compileOnly("ink.ptms.core:v11701:11701-minimize:universal")
+    compileOnly("ink.ptms.core:v11600:11600-minimize")
     compileOnly(kotlin("stdlib"))
     compileOnly(fileTree("libs"))
 }

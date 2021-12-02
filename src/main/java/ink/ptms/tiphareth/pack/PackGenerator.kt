@@ -4,7 +4,6 @@ import com.google.common.collect.Maps
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
-import org.apache.commons.lang.time.DateFormatUtils
 import org.bukkit.Material
 import taboolib.common.io.deepCopyTo
 import taboolib.common.io.deepDelete
@@ -12,13 +11,13 @@ import taboolib.common.io.digest
 import taboolib.common.io.newFile
 import taboolib.common.platform.function.getDataFolder
 import taboolib.library.xseries.parseToMaterial
-import taboolib.module.configuration.Local
-import taboolib.module.configuration.SecuredFile
+import taboolib.module.configuration.Configuration
+import taboolib.module.configuration.Type
 import taboolib.module.configuration.createLocal
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -122,7 +121,7 @@ object PackGenerator {
             materialFile.listFiles()?.forEach { file ->
                 if (file.name.endsWith(".png")) {
                     val name = file.name.replace(".png", "").replace(Regex("[() ]"), "").toLowerCase()
-                    val conf = SecuredFile()
+                    val conf = Configuration.empty(Type.YAML)
                     val json = JsonObject()
                     json.addProperty("credit", "Made with Tiphareth")
                     when (material) {
@@ -160,7 +159,7 @@ object PackGenerator {
 
     // 16777215
     fun generateCustomData(pack: PackObject): Int {
-        val material = pack.item?.type?.name ?: "unknown"
+        val material = pack.item.type.name
         if (mapping.contains("$material.${pack.getPackName()}")) {
             return mapping.getInt("$material.${pack.getPackName()}")
         }
@@ -216,7 +215,7 @@ object PackGenerator {
 
     private fun String.checkPlaceholder(time: Long): String {
         return this
-            .replace("@date", DateFormatUtils.format(System.currentTimeMillis(), "yyyy/MM/dd"))
+            .replace("@date", SimpleDateFormat("yyyy/MM/dd").format(System.currentTimeMillis()))
             .replace("@hash", time.toString().digest("sha-1").substring(0, 8))
     }
 }

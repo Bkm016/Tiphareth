@@ -5,14 +5,14 @@ import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.PotionMeta
 import taboolib.common.io.newFile
 import taboolib.library.xseries.XItemStack
-import taboolib.module.configuration.SecuredFile
+import taboolib.module.configuration.Configuration
 import java.io.File
 
 class PackObject(val packFile: File, val packType: PackType) {
 
-    val root = SecuredFile.loadConfiguration(packFile)
+    val root = Configuration.loadFromFile(packFile)
 
-    val item = XItemStack.deserialize(root.getConfigurationSection("item"))!!
+    val item = XItemStack.deserialize(root.getConfigurationSection("item")!!)!!
 
     val itemHide = root.getBoolean("item.hide")
 
