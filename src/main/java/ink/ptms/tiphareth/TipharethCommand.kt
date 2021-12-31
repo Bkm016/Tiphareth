@@ -125,4 +125,18 @@ object TipharethCommand {
             }
         }
     }
+
+    @CommandBody
+    val upload = subCommand {
+        execute<CommandSender> { sender, _, _ ->
+            submit(async = true) {
+                sender.sendMessage("§c[Tiphareth] §7生成上传...")
+                if (PackUploader.upload(PackGenerator.file())) {
+                    sender.sendMessage("§c[Tiphareth] §7上传成功.")
+                } else {
+                    sender.sendMessage("§c[Tiphareth] §7上传失败.")
+                }
+            }
+        }
+    }
 }
