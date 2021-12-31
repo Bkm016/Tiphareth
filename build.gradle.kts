@@ -34,7 +34,7 @@ dependencies {
     compileOnly("ink.ptms.core:v11701:11701-minimize:universal")
     compileOnly("ink.ptms.core:v11600:11600-minimize")
     compileOnly(kotlin("stdlib"))
-    compileOnly(fileTree("libs"))
+    taboo(fileTree("libs"))
 }
 
 tasks.withType<JavaCompile> {

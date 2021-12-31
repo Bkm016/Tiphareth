@@ -8,7 +8,7 @@ import taboolib.common.platform.function.info
 import taboolib.module.configuration.Config
 import taboolib.module.configuration.Configuration
 
-@RuntimeDependency("com.aliyuncs:oss:3.5.0", test = "com.aliyun.oss.OSS", repository = "http://repo.ptms.ink/repository/maven-releases")
+//@RuntimeDependency("com.aliyuncs:oss:3.5.0", test = "com.aliyun.oss.OSS", repository = "http://repo.ptms.ink/repository/maven-releases")
 object Tiphareth : Plugin() {
 
     @Config
