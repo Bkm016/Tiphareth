@@ -7,7 +7,7 @@ automatically-upload:
   # 储存空间名称
   bucket-name: mybucket
   # 储存空间目录
-  object-path: mybucket/tiphareth-pack.zip
+  object-path: mybucket/tiphareth-pack-{hash}.zip
   # 访问密钥
   access-key-id: ~
   access-key-secret: ~
